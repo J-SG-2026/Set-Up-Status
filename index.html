@@ -152,14 +152,20 @@
         const modal = document.getElementById("optionModal");
         const modalTitle = document.getElementById("modalVenueTitle");
 
+        function getFormattedDate() {
+            return new Date().toLocaleDateString('en-GB', { timeZone: 'Asia/Singapore' });
+        }
+
         function getFormattedTime() {
-            return new Date().toTimeString().split(' ')[0];
+            return new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Singapore' });
         }
 
         function logToGoogleSheet(venueObj, statusText, stageNum) {
             if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("PASTE_YOUR_GOOGLE")) return;
 
             const payload = {
+                date: getFormattedDate(),
+                time: getFormattedTime(),
                 venue: venueObj.venue || "",
                 category: venueObj.category || "",
                 note: venueObj.note || "",
