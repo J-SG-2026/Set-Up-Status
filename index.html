@@ -22,7 +22,7 @@
         th:nth-child(4), td:nth-child(4) { width: 10%; text-align: center; font-weight: bold; }
         th:nth-child(5), td:nth-child(5) { width: 28%; }
         
-        /* Table Stage Colors */
+        /* Table & Modal Stage Colors */
         .stage-1 { background-color: #C8E6C9; color: #1B5E20; }
         .stage-2 { background-color: #81C784; color: #0D3B0E; }
         .stage-3 { background-color: #4CAF50; color: #ffffff; }
@@ -41,18 +41,22 @@
         .modal h3 { margin-top: 0; margin-bottom: 20px; font-size: 22px; color: #222; font-weight: bold; }
         .modal-options { display: flex; flex-direction: column; gap: 14px; }
         
-        /* Modal Action Buttons */
-        .modal-btn { padding: 18px 12px; font-size: 18px; font-weight: bold; background-color: #2E7D32; color: #ffffff; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.15s ease, transform 0.05s ease; }
+        /* Modal Base Button Structure */
+        .modal-btn { padding: 18px 12px; font-size: 18px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.15s ease, transform 0.05s ease; }
         .modal-btn:active { transform: scale(0.98); }
-        .modal-btn:hover { background-color: #1B5E20; }
+        .modal-btn:hover { opacity: 0.9; }
+
+        /* 4 Unique Stage Shades for Modal */
+        .modal-btn.stage-btn-1 { background-color: #C8E6C9; color: #1B5E20; }
+        .modal-btn.stage-btn-2 { background-color: #81C784; color: #0D3B0E; }
+        .modal-btn.stage-btn-3 { background-color: #4CAF50; color: #ffffff; }
+        .modal-btn.stage-btn-4 { background-color: #2E7D32; color: #ffffff; }
         
         /* Red Clear Button */
-        .modal-btn.clear-btn { background-color: #dc3545; color: #ffffff; border: none; margin-top: 6px; }
-        .modal-btn.clear-btn:hover { background-color: #bd2130; }
+        .modal-btn.clear-btn { background-color: #dc3545; color: #ffffff; margin-top: 6px; }
         
         /* Grey Cancel Button */
-        .modal-btn.cancel-btn { background-color: #6c757d; color: #ffffff; border: none; }
-        .modal-btn.cancel-btn:hover { background-color: #5a6268; }
+        .modal-btn.cancel-btn { background-color: #6c757d; color: #ffffff; }
     </style>
 
     <!-- Firebase SDKs -->
@@ -86,10 +90,10 @@
         <div class="modal">
             <h3 id="modalVenueTitle">Select Status</h3>
             <div class="modal-options">
-                <button class="modal-btn" data-action="set" data-value="Eq at Venue" data-stage="1">1. Eq at Venue</button>
-                <button class="modal-btn" data-action="set" data-value="Eq set up" data-stage="2">2. Eq set up</button>
-                <button class="modal-btn" data-action="set" data-value="Eq Checked" data-stage="3">3. Eq Checked</button>
-                <button class="modal-btn" data-action="set" data-value="Eq Kept" data-stage="4">4. Eq Kept</button>
+                <button class="modal-btn stage-btn-1" data-action="set" data-value="Eq at Venue" data-stage="1">1. Eq at Venue</button>
+                <button class="modal-btn stage-btn-2" data-action="set" data-value="Eq set up" data-stage="2">2. Eq set up</button>
+                <button class="modal-btn stage-btn-3" data-action="set" data-value="Eq Checked" data-stage="3">3. Eq Checked</button>
+                <button class="modal-btn stage-btn-4" data-action="set" data-value="Eq Kept" data-stage="4">4. Eq Kept</button>
                 <button class="modal-btn clear-btn" data-action="clear">Clear Status / Reset</button>
                 <button class="modal-btn cancel-btn" data-action="cancel">Cancel</button>
             </div>
