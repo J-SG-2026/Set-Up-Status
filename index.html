@@ -139,24 +139,23 @@
             return new Date().toTimeString().split(' ')[0];
         }
 
-        // Send log payload to Google Sheets
+        // Send log entry using URLSearchParams to avoid CORS blocking
         function logToGoogleSheet(venueData, statusText, stageNum) {
-            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://docs.google.com/spreadsheets/d/1-aj8m_c1WpnwQb90xhJg5rnwqmyEUN9k86fokEcoe28") return;
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbwX4JoE-LtkGDrlTw6CdZGkSORW2Uso6TO3VRfVV4XY03KaBo4gPIKf6_wQ0oI0fMxW/exec")) return;
 
-            const payload = {
-                venue: venueData.venue,
-                category: venueData.category,
-                note: venueData.note,
-                stage: stageNum,
-                status: statusText,
-                staff: currentStaffName
-            };
+            const formData = new URLSearchParams();
+            formData.append("venue", venueData.venue);
+            formData.append("category", venueData.category);
+            formData.append("note", venueData.note);
+            formData.append("stage", stageNum);
+            formData.append("status", statusText);
+            formData.append("staff", currentStaffName);
 
             fetch(GOOGLE_SHEET_URL, {
                 method: "POST",
                 mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: formData.toString()
             }).catch(err => console.error("Sheets log error:", err));
         }
 
@@ -186,17 +185,22 @@
             tbody.appendChild(tr);
         });
 
-        // Handle Modal Selection
+        // Handle Modal Selection Buttons
         modal.querySelectorAll(".modal-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 const action = btn.getAttribute("data-action");
+
+                // Immediately hide popup modal upon button click
+                modal.classList.remove("active");
+
+                if (!activeVenueId) return;
                 const venueObj = tableData.find(v => v.id === activeVenueId);
 
                 if (action === "set") {
                     const opt = btn.getAttribute("data-value");
                     const stage = btn.getAttribute("data-stage");
 
-                    // 1. Update Realtime Firebase (Current Live State)
+                    // 1. Save to Firebase
                     statusRef.child(activeVenueId).set({
                         selectedOption: opt,
                         stage: stage,
@@ -204,7 +208,7 @@
                         timestamp: getFormattedTime()
                     });
 
-                    // 2. Log entry to Google Sheets (Audit Log History)
+                    // 2. Append row to Google Sheets
                     logToGoogleSheet(venueObj, opt, stage);
 
                 } else if (action === "clear") {
@@ -212,7 +216,6 @@
                     logToGoogleSheet(venueObj, "RESET / CLEARED", "-");
                 }
 
-                modal.classList.remove("active");
                 activeVenueId = null;
             });
         });
