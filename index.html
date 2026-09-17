@@ -22,13 +22,28 @@
             background: #fff;
             border: 1px solid #ccc;
             border-radius: 4px;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .user-panel input {
             padding: 6px 10px;
             font-size: 14px;
-            margin-left: 8px;
+        }
+
+        .btn-update {
+            padding: 6px 14px;
+            font-size: 14px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-update:hover {
+            background-color: #0056b3;
         }
 
         table {
@@ -39,7 +54,7 @@
 
         th, td {
             border: 1px solid #000;
-            padding: 8px;
+            padding: 10px;
             text-align: left;
             font-size: 14px;
         }
@@ -48,34 +63,110 @@
             background-color: #f2f2f2;
         }
 
-        /* White Default Buttons */
-        .option-btn {
-            background-color: #ffffff;
-            color: #000000;
-            border: 1px solid #888;
-            padding: 6px 12px;
+        /* Interactive Status Box Cell */
+        .status-cell {
             cursor: pointer;
-            border-radius: 4px;
-            font-size: 13px;
+            min-width: 220px;
+            height: 30px;
+            vertical-align: middle;
             transition: background-color 0.2s ease;
         }
 
-        /* Green Selected Button */
-        .option-btn.selected {
-            background-color: #4CAF50;
+        .status-cell:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Selected Status Green Box */
+        .status-cell.has-status {
+            background-color: #4CAF50 !important;
             color: #ffffff;
+            font-weight: bold;
             border-color: #388E3C;
-            font-weight: bold;
         }
 
-        .option-btn:hover {
-            border-color: #333;
+        .status-cell.has-status:hover {
+            background-color: #45a049 !important;
         }
 
-        .log-info {
-            font-size: 12px;
-            color: #222;
-            font-weight: bold;
+        .status-title {
+            font-size: 14px;
+            display: block;
+        }
+
+        .status-meta {
+            font-size: 11px;
+            font-weight: normal;
+            display: block;
+            margin-top: 2px;
+            opacity: 0.9;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .modal h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .modal-btn {
+            padding: 10px;
+            font-size: 14px;
+            background: #ffffff;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .modal-btn.clear-btn {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+            margin-top: 5px;
+        }
+
+        .modal-btn.clear-btn:hover {
+            background-color: #f5c6cb;
+        }
+
+        .modal-btn.cancel-btn {
+            background-color: #e2e3e5;
+            color: #383d41;
+            border-color: #d6d8db;
         }
     </style>
 
@@ -89,8 +180,9 @@
 
     <!-- User ID Input Panel -->
     <div class="user-panel">
-        <label for="username"><strong>Ground Staff Tag / Name:</strong></label>
-        <input type="text" id="username" value="Staff_1" placeholder="Enter Tag">
+        <label for="username"><strong>Staff Name:</strong></label>
+        <input type="text" id="username" value="J" placeholder="Enter Staff Name">
+        <button class="btn-update" id="btnUpdateName">Update</button>
     </div>
 
     <!-- Status Tracker Table -->
@@ -100,17 +192,28 @@
                 <th>Venues</th>
                 <th>Category</th>
                 <th>Note</th>
-                <th>Option 1</th>
-                <th>Option 2</th>
-                <th>Option 3</th>
-                <th>Option 4</th>
-                <th>Status Info</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             <!-- Dynamic Content -->
         </tbody>
     </table>
+
+    <!-- Popup Modal -->
+    <div class="modal-overlay" id="optionModal">
+        <div class="modal">
+            <h3 id="modalVenueTitle">Select Status</h3>
+            <div class="modal-options">
+                <button class="modal-btn" data-action="set" data-value="Eq at Venue">Eq at Venue</button>
+                <button class="modal-btn" data-action="set" data-value="Eq set up">Eq set up</button>
+                <button class="modal-btn" data-action="set" data-value="Eq Checked">Eq Checked</button>
+                <button class="modal-btn" data-action="set" data-value="Eq Kept">Eq Kept</button>
+                <button class="modal-btn clear-btn" data-action="clear">Clear Status / Reset</button>
+                <button class="modal-btn cancel-btn" data-action="cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // -------------------------------------------------------------
@@ -131,7 +234,9 @@
         const database = firebase.database();
         const statusRef = database.ref('setup_status');
 
-        // Venue list mapping
+        let currentStaffName = document.getElementById("username").value.trim() || "J";
+        let activeVenueId = null;
+
         const tableData = [
             { id: "v1", venue: "Van Gogh #01-11", category: "Prep", note: "CL" },
             { id: "v2", venue: "2I #02-03", category: "Prep", note: "ML" },
@@ -158,12 +263,13 @@
             { id: "v23", venue: "Music Room 1", category: "Exam", note: "CL" }
         ];
 
-        const options = ["Eq at Venue", "Eq set up", "Eq Checked", "Eq Kept"];
         const tbody = document.querySelector("#trackerTable tbody");
+        const modal = document.getElementById("optionModal");
+        const modalTitle = document.getElementById("modalVenueTitle");
 
         function getFormattedTime() {
             const now = new Date();
-            return now.toTimeString().split(' ')[0]; // Returns HH:MM:SS
+            return now.toTimeString().split(' ')[0]; // HH:MM:SS
         }
 
         // Render rows
@@ -175,63 +281,102 @@
                 <td>${row.venue}</td>
                 <td>${row.category}</td>
                 <td>${row.note}</td>
-                ${options.map((opt) => `
-                    <td>
-                        <button class="option-btn" data-opt="${opt}">${opt}</button>
-                    </td>
-                `).join('')}
-                <td><span class="log-info"></span></td>
+                <td class="status-cell" id="status-${row.id}"></td>
             `;
 
-            // Button click handlers
-            const buttons = tr.querySelectorAll(".option-btn");
-            buttons.forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const selectedOpt = btn.getAttribute("data-opt");
-                    const userTag = document.getElementById("username").value.trim() || "Staff";
-                    const time = getFormattedTime();
-
-                    // Save directly to Firebase
-                    statusRef.child(row.id).set({
-                        selectedOption: selectedOpt,
-                        updatedBy: userTag,
-                        timestamp: time
-                    });
-                });
+            // Open Modal on cell click
+            const statusCell = tr.querySelector(".status-cell");
+            statusCell.addEventListener("click", () => {
+                activeVenueId = row.id;
+                modalTitle.textContent = `${row.venue}`;
+                modal.classList.add("active");
             });
 
             tbody.appendChild(tr);
         });
 
+        // Handle Modal Action Buttons
+        modal.querySelectorAll(".modal-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const action = btn.getAttribute("data-action");
+
+                if (action === "set") {
+                    const opt = btn.getAttribute("data-value");
+                    statusRef.child(activeVenueId).set({
+                        selectedOption: opt,
+                        updatedBy: currentStaffName,
+                        timestamp: getFormattedTime()
+                    });
+                } else if (action === "clear") {
+                    statusRef.child(activeVenueId).remove();
+                }
+
+                modal.classList.remove("active");
+                activeVenueId = null;
+            });
+        });
+
+        // Close Modal if user clicks outside box
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.classList.remove("active");
+                activeVenueId = null;
+            }
+        });
+
         // -------------------------------------------------------------
-        // Realtime Listener: Updates UI for all connected devices live
+        // Update Button: Updates local staff name & updates previous records
+        // -------------------------------------------------------------
+        document.getElementById("btnUpdateName").addEventListener("click", () => {
+            const newName = document.getElementById("username").value.trim();
+            if (!newName) {
+                alert("Please enter a valid staff name.");
+                return;
+            }
+
+            const oldName = currentStaffName;
+            currentStaffName = newName;
+
+            // Retroactively update entries updated by the old name
+            if (oldName && oldName !== newName) {
+                statusRef.once('value', (snapshot) => {
+                    const updates = {};
+                    const data = snapshot.val() || {};
+
+                    Object.keys(data).forEach(vId => {
+                        if (data[vId] && data[vId].updatedBy === oldName) {
+                            updates[`${vId}/updatedBy`] = newName;
+                        }
+                    });
+
+                    if (Object.keys(updates).length > 0) {
+                        statusRef.update(updates);
+                    }
+                });
+            }
+
+            alert(`Staff name updated to: ${newName}`);
+        });
+
+        // -------------------------------------------------------------
+        // Realtime Listener: Syncs Status UI live
         // -------------------------------------------------------------
         statusRef.on('value', (snapshot) => {
             const data = snapshot.val() || {};
 
             tableData.forEach((row) => {
-                const tr = document.getElementById(`row-${row.id}`);
-                const buttons = tr.querySelectorAll(".option-btn");
-                const logCell = tr.querySelector(".log-info");
-
+                const cell = document.getElementById(`status-${row.id}`);
                 const rowState = data[row.id];
 
-                if (rowState) {
-                    // Update button styling
-                    buttons.forEach(btn => {
-                        if (btn.getAttribute("data-opt") === rowState.selectedOption) {
-                            btn.classList.add("selected");
-                        } else {
-                            btn.classList.remove("selected");
-                        }
-                    });
-
-                    // Update timestamp & tag info
-                    logCell.textContent = `[${rowState.updatedBy} @ ${rowState.timestamp}]`;
+                if (rowState && rowState.selectedOption) {
+                    cell.classList.add("has-status");
+                    cell.innerHTML = `
+                        <span class="status-title">${rowState.selectedOption}</span>
+                        <span class="status-meta">[${rowState.updatedBy} @ ${rowState.timestamp}]</span>
+                    `;
                 } else {
-                    // Reset if clear
-                    buttons.forEach(btn => btn.classList.remove("selected"));
-                    logCell.textContent = "";
+                    cell.classList.remove("has-status");
+                    cell.innerHTML = "";
                 }
             });
         });
