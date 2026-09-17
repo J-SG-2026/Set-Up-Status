@@ -139,25 +139,23 @@
             return new Date().toTimeString().split(' ')[0];
         }
 
-        // Send log entry using form-encoded payload
+        // Zero-CORS GET logger using image ping trigger
         function logToGoogleSheet(venueData, statusText, stageNum) {
             if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbzrW-kma5LrP3j71bvggYTKALopQGRW_MttBvCJlv38avDbPsklMh4G1ipfLEeLRLtG/exec")) return;
 
-            const payload = new URLSearchParams({
-                venue: String(venueData.venue || ""),
-                category: String(venueData.category || ""),
-                note: String(venueData.note || ""),
-                stage: String(stageNum || ""),
-                status: String(statusText || ""),
-                staff: String(currentStaffName || "")
+            const params = new URLSearchParams({
+                venue: venueData.venue || "",
+                category: venueData.category || "",
+                note: venueData.note || "",
+                stage: stageNum || "",
+                status: statusText || "",
+                staff: currentStaffName || ""
             });
 
-            fetch(GOOGLE_SHEET_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: payload.toString()
-            }).catch(err => console.error("Sheets log error:", err));
+            const fullUrl = `${GOOGLE_SHEET_URL}?${params.toString()}`;
+
+            const ping = new Image();
+            ping.src = fullUrl;
         }
 
         tableData.forEach((row) => {
