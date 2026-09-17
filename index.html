@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Up Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .user-panel {
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .user-panel input {
+            padding: 6px 10px;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #fff;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* White Default Buttons */
+        .option-btn {
+            background-color: #ffffff;
+            color: #000000;
+            border: 1px solid #888;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Green Selected Button */
+        .option-btn.selected {
+            background-color: #4CAF50;
+            color: #ffffff;
+            border-color: #388E3C;
+            font-weight: bold;
+        }
+
+        .option-btn:hover {
+            border-color: #333;
+        }
+
+        .log-info {
+            font-size: 12px;
+            color: #222;
+            font-weight: bold;
+        }
+    </style>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <h2>Set Up Status</h2>
+
+    <!-- User ID Input Panel -->
+    <div class="user-panel">
+        <label for="username"><strong>Ground Staff Tag / Name:</strong></label>
+        <input type="text" id="username" value="Staff_1" placeholder="Enter Tag">
+    </div>
+
+    <!-- Status Tracker Table -->
+    <table id="trackerTable">
+        <thead>
+            <tr>
+                <th>Venues</th>
+                <th>Category</th>
+                <th>Note</th>
+                <th>Option 1</th>
+                <th>Option 2</th>
+                <th>Option 3</th>
+                <th>Option 4</th>
+                <th>Status Info</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamic Content -->
+        </tbody>
+    </table>
+
+    <script>
+        // -------------------------------------------------------------
+        // 1. REPLACE THIS WITH YOUR FIREBASE CONFIG
+        // -------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const statusRef = database.ref('setup_status');
+
+        // Venue list mapping
+        const tableData = [
+            { id: "v1", venue: "Van Gogh #01-11", category: "Prep", note: "CL" },
+            { id: "v2", venue: "2I #02-03", category: "Prep", note: "ML" },
+            { id: "v3", venue: "6M #04-05", category: "Prep", note: "CL" },
+            { id: "v4", venue: "2R #02-04", category: "Prep", note: "ML" },
+            { id: "v5", venue: "1C #01-22", category: "Prep", note: "CL" },
+            { id: "v6", venue: "5M #04-01", category: "Prep", note: "CL" },
+            { id: "v7", venue: "2S #02-27", category: "Prep", note: "TL" },
+            { id: "v8", venue: "Meeting Room 1", category: "Exam", note: "CL" },
+            { id: "v9", venue: "Meeting Room 2", category: "Exam", note: "CL" },
+            { id: "v10", venue: "Meeting Room 3", category: "Exam", note: "CL" },
+            { id: "v11", venue: "6R classroom 01-29", category: "Exam", note: "CL" },
+            { id: "v12", venue: "1R classroom 01-20", category: "Exam", note: "CL" },
+            { id: "v13", venue: "1I classroom 01-21", category: "Exam", note: "CL" },
+            { id: "v14", venue: "Einstein 02-15", category: "Exam", note: "ML" },
+            { id: "v15", venue: "Newton 02-14", category: "Exam", note: "ML" },
+            { id: "v16", venue: "4 M classroom 02-13", category: "Exam", note: "ML" },
+            { id: "v17", venue: "Library Stage", category: "Exam", note: "ML" },
+            { id: "v18", venue: "Library Corner A", category: "Exam", note: "ML" },
+            { id: "v19", venue: "Library Corner B", category: "Exam", note: "ML" },
+            { id: "v20", venue: "Library small room", category: "Exam", note: "ML" },
+            { id: "v21", venue: "3T classroom 02-21", category: "Exam", note: "TL" },
+            { id: "v22", venue: "6M2 classroom", category: "Exam", note: "CL" },
+            { id: "v23", venue: "Music Room 1", category: "Exam", note: "CL" }
+        ];
+
+        const options = ["Eq at Venue", "Eq set up", "Eq Checked", "Eq Kept"];
+        const tbody = document.querySelector("#trackerTable tbody");
+
+        function getFormattedTime() {
+            const now = new Date();
+            return now.toTimeString().split(' ')[0]; // Returns HH:MM:SS
+        }
+
+        // Render rows
+        tableData.forEach((row) => {
+            const tr = document.createElement("tr");
+            tr.setAttribute("id", `row-${row.id}`);
+
+            tr.innerHTML = `
+                <td>${row.venue}</td>
+                <td>${row.category}</td>
+                <td>${row.note}</td>
+                ${options.map((opt) => `
+                    <td>
+                        <button class="option-btn" data-opt="${opt}">${opt}</button>
+                    </td>
+                `).join('')}
+                <td><span class="log-info"></span></td>
+            `;
+
+            // Button click handlers
+            const buttons = tr.querySelectorAll(".option-btn");
+            buttons.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const selectedOpt = btn.getAttribute("data-opt");
+                    const userTag = document.getElementById("username").value.trim() || "Staff";
+                    const time = getFormattedTime();
+
+                    // Save directly to Firebase
+                    statusRef.child(row.id).set({
+                        selectedOption: selectedOpt,
+                        updatedBy: userTag,
+                        timestamp: time
+                    });
+                });
+            });
+
+            tbody.appendChild(tr);
+        });
+
+        // -------------------------------------------------------------
+        // Realtime Listener: Updates UI for all connected devices live
+        // -------------------------------------------------------------
+        statusRef.on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+
+            tableData.forEach((row) => {
+                const tr = document.getElementById(`row-${row.id}`);
+                const buttons = tr.querySelectorAll(".option-btn");
+                const logCell = tr.querySelector(".log-info");
+
+                const rowState = data[row.id];
+
+                if (rowState) {
+                    // Update button styling
+                    buttons.forEach(btn => {
+                        if (btn.getAttribute("data-opt") === rowState.selectedOption) {
+                            btn.classList.add("selected");
+                        } else {
+                            btn.classList.remove("selected");
+                        }
+                    });
+
+                    // Update timestamp & tag info
+                    logCell.textContent = `[${rowState.updatedBy} @ ${rowState.timestamp}]`;
+                } else {
+                    // Reset if clear
+                    buttons.forEach(btn => btn.classList.remove("selected"));
+                    logCell.textContent = "";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
