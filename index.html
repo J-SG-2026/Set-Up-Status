@@ -5,195 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Set Up Status</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            margin: 10px;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
-
-        h2 {
-            margin: 5px 0 15px 0;
-            color: #333;
-            font-size: 22px;
-        }
-
-        .user-panel {
-            margin-bottom: 15px;
-            padding: 8px 12px;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            max-width: 100%;
-        }
-
-        .user-panel label {
-            font-size: 16px;
-            white-space: nowrap;
-        }
-
-        .user-panel input {
-            padding: 8px;
-            font-size: 16px;
-            flex-grow: 1;
-            min-width: 0;
-        }
-
-        .btn-update {
-            padding: 8px 14px;
-            font-size: 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .btn-update:hover {
-            background-color: #0056b3;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            background-color: #fff;
-            table-layout: fixed; /* Ensures tight column width control */
-        }
-
-        th, td {
-            border: 1px solid #000;
-            padding: 6px;
-            text-align: left;
-            font-size: 15px; /* Larger body font for mobile readability */
-            word-wrap: break-word;
-        }
-
-        th {
-            background-color: #f2f2f2;
-            font-size: 14px;
-        }
-
-        /* Responsive Column Width Allocations */
-        th:nth-child(1), td:nth-child(1) { width: 38%; } /* Venues gets maximum room */
-        th:nth-child(2), td:nth-child(2) { width: 14%; text-align: center; } /* Category */
-        th:nth-child(3), td:nth-child(3) { width: 10%; text-align: center; } /* Note */
-        th:nth-child(4), td:nth-child(4) { width: 10%; text-align: center; font-weight: bold; } /* Stage */
-        th:nth-child(5), td:nth-child(5) { width: 28%; } /* Status */
-
-        /* Stage Numbers Color Shading */
-        .stage-1 { background-color: #C8E6C9; color: #1B5E20; } /* Lightest green */
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; margin: 10px; padding: 0; background-color: #f9f9f9; }
+        h2 { margin: 5px 0 15px 0; color: #333; font-size: 22px; }
+        .user-panel { margin-bottom: 15px; padding: 8px 12px; background: #fff; border: 1px solid #ccc; border-radius: 6px; display: flex; align-items: center; gap: 10px; max-width: 100%; }
+        .user-panel label { font-size: 16px; white-space: nowrap; }
+        .user-panel input { padding: 8px; font-size: 16px; flex-grow: 1; min-width: 0; }
+        .btn-update { padding: 8px 14px; font-size: 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+        .btn-update:hover { background-color: #0056b3; }
+        table { border-collapse: collapse; width: 100%; background-color: #fff; table-layout: fixed; }
+        th, td { border: 1px solid #000; padding: 6px; text-align: left; font-size: 15px; word-wrap: break-word; }
+        th { background-color: #f2f2f2; font-size: 14px; }
+        th:nth-child(1), td:nth-child(1) { width: 38%; }
+        th:nth-child(2), td:nth-child(2) { width: 14%; text-align: center; }
+        th:nth-child(3), td:nth-child(3) { width: 10%; text-align: center; }
+        th:nth-child(4), td:nth-child(4) { width: 10%; text-align: center; font-weight: bold; }
+        th:nth-child(5), td:nth-child(5) { width: 28%; }
+        .stage-1 { background-color: #C8E6C9; color: #1B5E20; }
         .stage-2 { background-color: #81C784; color: #0D3B0E; }
         .stage-3 { background-color: #4CAF50; color: #ffffff; }
-        .stage-4 { background-color: #2E7D32; color: #ffffff; } /* Darkest green */
-
-        /* Interactive Status Box Cell */
-        .status-cell {
-            cursor: pointer;
-            vertical-align: middle;
-            transition: background-color 0.2s ease;
-            font-size: 13px;
-        }
-
-        .status-cell:hover {
-            background-color: #f0f0f0;
-        }
-
-        /* Selected Status Styling */
-        .status-cell.has-status {
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        .status-title {
-            font-size: 13px;
-            display: block;
-            line-height: 1.2;
-        }
-
-        .status-meta {
-            font-size: 10px;
-            font-weight: normal;
-            display: block;
-            margin-top: 3px;
-            opacity: 0.95;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 85%;
-            max-width: 320px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-
-        .modal h3 {
-            margin-top: 0;
-            font-size: 18px;
-            color: #333;
-        }
-
-        .modal-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .modal-btn {
-            padding: 12px;
-            font-size: 15px;
-            background: #ffffff;
-            border: 1px solid #aaa;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .modal-btn:hover {
-            background: #f0f0f0;
-        }
-
-        .modal-btn.clear-btn {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-color: #f5c6cb;
-            margin-top: 5px;
-        }
-
-        .modal-btn.clear-btn:hover {
-            background-color: #f5c6cb;
-        }
-
-        .modal-btn.cancel-btn {
-            background-color: #e2e3e5;
-            color: #383d41;
-            border-color: #d6d8db;
-        }
+        .stage-4 { background-color: #2E7D32; color: #ffffff; }
+        .status-cell { cursor: pointer; vertical-align: middle; transition: background-color 0.2s ease; font-size: 13px; }
+        .status-cell:hover { background-color: #f0f0f0; }
+        .status-cell.has-status { color: #ffffff; font-weight: bold; }
+        .status-title { font-size: 13px; display: block; line-height: 1.2; }
+        .status-meta { font-size: 10px; font-weight: normal; display: block; margin-top: 3px; opacity: 0.95; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; padding: 20px; border-radius: 8px; width: 85%; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); text-align: center; }
+        .modal h3 { margin-top: 0; font-size: 18px; color: #333; }
+        .modal-options { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .modal-btn { padding: 12px; font-size: 15px; background: #ffffff; border: 1px solid #aaa; border-radius: 6px; cursor: pointer; }
+        .modal-btn:hover { background: #f0f0f0; }
+        .modal-btn.clear-btn { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; margin-top: 5px; }
+        .modal-btn.clear-btn:hover { background-color: #f5c6cb; }
+        .modal-btn.cancel-btn { background-color: #e2e3e5; color: #383d41; border-color: #d6d8db; }
     </style>
 
     <!-- Firebase SDKs -->
@@ -204,14 +50,12 @@
 
     <h2>Set Up Status</h2>
 
-    <!-- User ID Input Panel -->
     <div class="user-panel">
         <label for="username"><strong>Staff Name:</strong></label>
         <input type="text" id="username" value="Y" placeholder="Enter Name">
         <button class="btn-update" id="btnUpdateName">Update</button>
     </div>
 
-    <!-- Status Tracker Table -->
     <table id="trackerTable">
         <thead>
             <tr>
@@ -222,12 +66,9 @@
                 <th>Status</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- Dynamic Content -->
-        </tbody>
+        <tbody></tbody>
     </table>
 
-    <!-- Popup Modal -->
     <div class="modal-overlay" id="optionModal">
         <div class="modal">
             <h3 id="modalVenueTitle">Select Status</h3>
@@ -256,7 +97,6 @@
             appId: "1:209978478786:web:c202c1176964ab803d6b5b"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const statusRef = database.ref('setup_status');
@@ -290,23 +130,36 @@
             { id: "v23", venue: "Music Room 1", category: "Exam", note: "CL" }
         ];
 
-        const optionToStage = {
-            "Eq at Venue": 1,
-            "Eq set up": 2,
-            "Eq Checked": 3,
-            "Eq Kept": 4
-        };
-
+        const optionToStage = { "Eq at Venue": 1, "Eq set up": 2, "Eq Checked": 3, "Eq Kept": 4 };
         const tbody = document.querySelector("#trackerTable tbody");
         const modal = document.getElementById("optionModal");
         const modalTitle = document.getElementById("modalVenueTitle");
 
         function getFormattedTime() {
-            const now = new Date();
-            return now.toTimeString().split(' ')[0]; // HH:MM:SS
+            return new Date().toTimeString().split(' ')[0];
         }
 
-        // Render rows
+        // Send log payload to Google Sheets
+        function logToGoogleSheet(venueData, statusText, stageNum) {
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") return;
+
+            const payload = {
+                venue: venueData.venue,
+                category: venueData.category,
+                note: venueData.note,
+                stage: stageNum,
+                status: statusText,
+                staff: currentStaffName
+            };
+
+            fetch(GOOGLE_SHEET_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("Sheets log error:", err));
+        }
+
         tableData.forEach((row) => {
             const tr = document.createElement("tr");
             tr.setAttribute("id", `row-${row.id}`);
@@ -319,7 +172,6 @@
                 <td class="status-cell" id="status-${row.id}"></td>
             `;
 
-            // Open Modal on status or stage cell click
             const statusCell = tr.querySelector(".status-cell");
             const stageCell = tr.querySelector(".stage-cell");
             
@@ -331,26 +183,33 @@
 
             statusCell.addEventListener("click", openModal);
             stageCell.addEventListener("click", openModal);
-
             tbody.appendChild(tr);
         });
 
-        // Handle Modal Action Buttons
+        // Handle Modal Selection
         modal.querySelectorAll(".modal-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 const action = btn.getAttribute("data-action");
+                const venueObj = tableData.find(v => v.id === activeVenueId);
 
                 if (action === "set") {
                     const opt = btn.getAttribute("data-value");
                     const stage = btn.getAttribute("data-stage");
+
+                    // 1. Update Realtime Firebase (Current Live State)
                     statusRef.child(activeVenueId).set({
                         selectedOption: opt,
                         stage: stage,
                         updatedBy: currentStaffName,
                         timestamp: getFormattedTime()
                     });
+
+                    // 2. Log entry to Google Sheets (Audit Log History)
+                    logToGoogleSheet(venueObj, opt, stage);
+
                 } else if (action === "clear") {
                     statusRef.child(activeVenueId).remove();
+                    logToGoogleSheet(venueObj, "RESET / CLEARED", "-");
                 }
 
                 modal.classList.remove("active");
@@ -358,7 +217,6 @@
             });
         });
 
-        // Close Modal if user clicks outside box
         modal.addEventListener("click", (e) => {
             if (e.target === modal) {
                 modal.classList.remove("active");
@@ -366,15 +224,9 @@
             }
         });
 
-        // -------------------------------------------------------------
-        // Update Button: Updates local staff name & previous records
-        // -------------------------------------------------------------
         document.getElementById("btnUpdateName").addEventListener("click", () => {
             const newName = document.getElementById("username").value.trim();
-            if (!newName) {
-                alert("Please enter a valid staff name.");
-                return;
-            }
+            if (!newName) return alert("Please enter a valid staff name.");
 
             const oldName = currentStaffName;
             currentStaffName = newName;
@@ -383,51 +235,34 @@
                 statusRef.once('value', (snapshot) => {
                     const updates = {};
                     const data = snapshot.val() || {};
-
                     Object.keys(data).forEach(vId => {
                         if (data[vId] && data[vId].updatedBy === oldName) {
                             updates[`${vId}/updatedBy`] = newName;
                         }
                     });
-
-                    if (Object.keys(updates).length > 0) {
-                        statusRef.update(updates);
-                    }
+                    if (Object.keys(updates).length > 0) statusRef.update(updates);
                 });
             }
-
             alert(`Staff name updated to: ${newName}`);
         });
 
-        // -------------------------------------------------------------
-        // Realtime Listener: Syncs Status UI live
-        // -------------------------------------------------------------
         statusRef.on('value', (snapshot) => {
             const data = snapshot.val() || {};
-
             tableData.forEach((row) => {
                 const statusCell = document.getElementById(`status-${row.id}`);
                 const stageCell = document.getElementById(`stage-${row.id}`);
                 const rowState = data[row.id];
 
-                // Reset classes
                 stageCell.className = "stage-cell";
                 statusCell.className = "status-cell";
 
                 if (rowState && rowState.selectedOption) {
                     const stageNum = rowState.stage || optionToStage[rowState.selectedOption] || "";
-                    
-                    // Update Stage Cell
                     stageCell.textContent = stageNum;
-                    if (stageNum) {
-                        stageCell.classList.add(`stage-${stageNum}`);
-                    }
+                    if (stageNum) stageCell.classList.add(`stage-${stageNum}`);
 
-                    // Update Status Cell
                     statusCell.classList.add("has-status");
-                    if (stageNum) {
-                        statusCell.classList.add(`stage-${stageNum}`);
-                    }
+                    if (stageNum) statusCell.classList.add(`stage-${stageNum}`);
 
                     statusCell.innerHTML = `
                         <span class="status-title">${rowState.selectedOption}</span>
