@@ -85,8 +85,12 @@
 
     <script>
         // -------------------------------------------------------------
-        // 1. REPLACE THIS WITH YOUR FIREBASE CONFIG
+        // CONFIGURATIONS
         // -------------------------------------------------------------
+        // TODO: PASTE YOUR GOOGLE APP SCRIPT WEB APP URL HERE!
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbx0ZXh-z-gO2Me5GTPjSLaC1nix6o68r_4ojsLQQ5mh9vECLY9_AQzApWqnnmqMVTPQ/exec";
+
+        // TODO: PASTE YOUR FIREBASE CONFIGURATION HERE!
         const firebaseConfig = {
             apiKey: "AIzaSyCvwQzmM5mYxj1NGEBcx4CwX2V94QfYBOw",
             authDomain: "set-up-status.firebaseapp.com",
@@ -139,24 +143,25 @@
             return new Date().toTimeString().split(' ')[0];
         }
 
-        // Zero-CORS GET logger using image ping trigger
-        function logToGoogleSheet(venueData, statusText, stageNum) {
-            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycby2iosn0UTxGNSyjYlQAYFvBR6hjNTZzNnC8oKTtYZgWf00ghLYqD24AtcdvOx1jhA6/exec")) return;
+        // Exact logger mechanism from the working building script
+        function logToGoogleSheet(venueObj, statusText, stageNum) {
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("PASTE_YOUR_GOOGLE")) return;
 
-            const params = new URLSearchParams({
-                venue: venueData.venue || "",
-                category: venueData.category || "",
-                note: venueData.note || "",
+            const payload = {
+                venue: venueObj.venue || "",
+                category: venueObj.category || "",
+                note: venueObj.note || "",
                 stage: stageNum || "",
                 status: statusText || "",
                 staff: currentStaffName || ""
-            });
+            };
 
-            const fullUrl = `${GOOGLE_SHEET_URL}?${params.toString()}`;
-            console.log("Sending log ping to Google Sheets:", fullUrl);
-
-            const ping = new Image();
-            ping.src = fullUrl;
+            fetch(GOOGLE_SHEET_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).catch(err => console.warn("Google Sheet logging failed:", err));
         }
 
         tableData.forEach((row) => {
@@ -190,25 +195,16 @@
             btn.addEventListener("click", () => {
                 const action = btn.getAttribute("data-action");
 
-                // Instantly hide popup modal
+                // Hide popup modal
                 modal.classList.remove("active");
 
-                if (!activeVenueId) {
-                    console.error("No venue ID found for selection.");
-                    return;
-                }
-
+                if (!activeVenueId) return;
                 const venueObj = tableData.find(v => v.id === activeVenueId);
-                if (!venueObj) {
-                    console.error("Venue object not found:", activeVenueId);
-                    return;
-                }
+                if (!venueObj) return;
 
                 if (action === "set") {
                     const opt = btn.getAttribute("data-value");
                     const stage = btn.getAttribute("data-stage");
-
-                    console.log("Saving selection:", venueObj.venue, opt, stage);
 
                     // 1. Save to Realtime Firebase
                     statusRef.child(activeVenueId).set({
@@ -218,7 +214,7 @@
                         timestamp: getFormattedTime()
                     });
 
-                    // 2. Append row to Google Sheets
+                    // 2. Append row to Google Sheets via JSON POST
                     logToGoogleSheet(venueObj, opt, stage);
 
                 } else if (action === "clear") {
