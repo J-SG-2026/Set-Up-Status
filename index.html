@@ -139,24 +139,25 @@
             return new Date().toTimeString().split(' ')[0];
         }
 
-        // Send log entry via URL parameters (Bypasses CORS completely)
+        // Send log entry using form-encoded payload
         function logToGoogleSheet(venueData, statusText, stageNum) {
-            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbz1cPtqS8bSBvKYpzOx0RJqDx1IH8wvFehHc2lGqzZk6qDsbgetZiZEKRpqeMXnaeHn/exec")) return;
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbzH9k_zDMK6dSq83Xsdwh1gGZzrzFQBlCwEeAuwBtkSDpWXwkXvM9fD_IwwV5DLL2JJ/exec")) return;
 
-            const params = new URLSearchParams({
-                venue: venueData.venue,
-                category: venueData.category,
-                note: venueData.note,
-                stage: stageNum,
-                status: statusText,
-                staff: currentStaffName
+            const payload = new URLSearchParams({
+                venue: String(venueData.venue || ""),
+                category: String(venueData.category || ""),
+                note: String(venueData.note || ""),
+                stage: String(stageNum || ""),
+                status: String(statusText || ""),
+                staff: String(currentStaffName || "")
             });
 
-            const requestUrl = `${GOOGLE_SHEET_URL}?${params.toString()}`;
-
-            // Image ping triggers Google Apps Script instantly without CORS checks
-            const img = new Image();
-            img.src = requestUrl;
+            fetch(GOOGLE_SHEET_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: payload.toString()
+            }).catch(err => console.error("Sheets log error:", err));
         }
 
         tableData.forEach((row) => {
@@ -200,7 +201,7 @@
                     const opt = btn.getAttribute("data-value");
                     const stage = btn.getAttribute("data-stage");
 
-                    // 1. Update Realtime Firebase
+                    // 1. Save to Realtime Firebase
                     statusRef.child(activeVenueId).set({
                         selectedOption: opt,
                         stage: stage,
