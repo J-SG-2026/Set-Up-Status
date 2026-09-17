@@ -141,7 +141,7 @@
 
         // Zero-CORS GET logger using image ping trigger
         function logToGoogleSheet(venueData, statusText, stageNum) {
-            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbzrW-kma5LrP3j71bvggYTKALopQGRW_MttBvCJlv38avDbPsklMh4G1ipfLEeLRLtG/exec")) return;
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbzrhjy_htZ00sDatAP7aiUZ-MSRSbzRCuxHZ3JjDbe_m0ax4E4M61UoPqLakjo43PUs/exec")) return;
 
             const params = new URLSearchParams({
                 venue: venueData.venue || "",
