@@ -141,7 +141,7 @@
 
         // Send log entry using form-encoded payload
         function logToGoogleSheet(venueData, statusText, stageNum) {
-            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbzH9k_zDMK6dSq83Xsdwh1gGZzrzFQBlCwEeAuwBtkSDpWXwkXvM9fD_IwwV5DLL2JJ/exec")) return;
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbzrW-kma5LrP3j71bvggYTKALopQGRW_MttBvCJlv38avDbPsklMh4G1ipfLEeLRLtG/exec")) return;
 
             const payload = new URLSearchParams({
                 venue: String(venueData.venue || ""),
