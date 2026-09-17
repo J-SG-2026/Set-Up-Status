@@ -141,7 +141,7 @@
 
         // Zero-CORS GET logger using image ping trigger
         function logToGoogleSheet(venueData, statusText, stageNum) {
-            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbzrhjy_htZ00sDatAP7aiUZ-MSRSbzRCuxHZ3JjDbe_m0ax4E4M61UoPqLakjo43PUs/exec")) return;
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycby2iosn0UTxGNSyjYlQAYFvBR6hjNTZzNnC8oKTtYZgWf00ghLYqD24AtcdvOx1jhA6/exec")) return;
 
             const params = new URLSearchParams({
                 venue: venueData.venue || "",
@@ -153,6 +153,7 @@
             });
 
             const fullUrl = `${GOOGLE_SHEET_URL}?${params.toString()}`;
+            console.log("Sending log ping to Google Sheets:", fullUrl);
 
             const ping = new Image();
             ping.src = fullUrl;
@@ -192,12 +193,22 @@
                 // Instantly hide popup modal
                 modal.classList.remove("active");
 
-                if (!activeVenueId) return;
+                if (!activeVenueId) {
+                    console.error("No venue ID found for selection.");
+                    return;
+                }
+
                 const venueObj = tableData.find(v => v.id === activeVenueId);
+                if (!venueObj) {
+                    console.error("Venue object not found:", activeVenueId);
+                    return;
+                }
 
                 if (action === "set") {
                     const opt = btn.getAttribute("data-value");
                     const stage = btn.getAttribute("data-stage");
+
+                    console.log("Saving selection:", venueObj.venue, opt, stage);
 
                     // 1. Save to Realtime Firebase
                     statusRef.child(activeVenueId).set({
