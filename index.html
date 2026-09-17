@@ -2,44 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Set Up Status</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 10px;
+            padding: 0;
             background-color: #f9f9f9;
         }
 
         h2 {
-            margin-top: 0;
+            margin: 5px 0 15px 0;
             color: #333;
+            font-size: 22px;
         }
 
         .user-panel {
-            margin-bottom: 20px;
-            padding: 10px 15px;
+            margin-bottom: 15px;
+            padding: 8px 12px;
             background: #fff;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            display: inline-flex;
+            border-radius: 6px;
+            display: flex;
             align-items: center;
             gap: 10px;
+            max-width: 100%;
+        }
+
+        .user-panel label {
+            font-size: 16px;
+            white-space: nowrap;
         }
 
         .user-panel input {
-            padding: 6px 10px;
-            font-size: 14px;
+            padding: 8px;
+            font-size: 16px;
+            flex-grow: 1;
+            min-width: 0;
         }
 
         .btn-update {
-            padding: 6px 14px;
-            font-size: 14px;
+            padding: 8px 14px;
+            font-size: 15px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .btn-update:hover {
@@ -50,55 +65,65 @@
             border-collapse: collapse;
             width: 100%;
             background-color: #fff;
+            table-layout: fixed; /* Ensures tight column width control */
         }
 
         th, td {
             border: 1px solid #000;
-            padding: 10px;
+            padding: 6px;
             text-align: left;
-            font-size: 14px;
+            font-size: 15px; /* Larger body font for mobile readability */
+            word-wrap: break-word;
         }
 
         th {
             background-color: #f2f2f2;
+            font-size: 14px;
         }
+
+        /* Responsive Column Width Allocations */
+        th:nth-child(1), td:nth-child(1) { width: 38%; } /* Venues gets maximum room */
+        th:nth-child(2), td:nth-child(2) { width: 14%; text-align: center; } /* Category */
+        th:nth-child(3), td:nth-child(3) { width: 10%; text-align: center; } /* Note */
+        th:nth-child(4), td:nth-child(4) { width: 10%; text-align: center; font-weight: bold; } /* Stage */
+        th:nth-child(5), td:nth-child(5) { width: 28%; } /* Status */
+
+        /* Stage Numbers Color Shading */
+        .stage-1 { background-color: #C8E6C9; color: #1B5E20; } /* Lightest green */
+        .stage-2 { background-color: #81C784; color: #0D3B0E; }
+        .stage-3 { background-color: #4CAF50; color: #ffffff; }
+        .stage-4 { background-color: #2E7D32; color: #ffffff; } /* Darkest green */
 
         /* Interactive Status Box Cell */
         .status-cell {
             cursor: pointer;
-            min-width: 220px;
-            height: 30px;
             vertical-align: middle;
             transition: background-color 0.2s ease;
+            font-size: 13px;
         }
 
         .status-cell:hover {
             background-color: #f0f0f0;
         }
 
-        /* Selected Status Green Box */
+        /* Selected Status Styling */
         .status-cell.has-status {
-            background-color: #4CAF50 !important;
             color: #ffffff;
             font-weight: bold;
-            border-color: #388E3C;
-        }
-
-        .status-cell.has-status:hover {
-            background-color: #45a049 !important;
         }
 
         .status-title {
-            font-size: 14px;
+            font-size: 13px;
             display: block;
+            line-height: 1.2;
         }
 
         .status-meta {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: normal;
             display: block;
-            margin-top: 2px;
-            opacity: 0.9;
+            margin-top: 3px;
+            opacity: 0.95;
         }
 
         /* Modal Styles */
@@ -107,7 +132,7 @@
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -121,14 +146,15 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            width: 300px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            width: 85%;
+            max-width: 320px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             text-align: center;
         }
 
         .modal h3 {
             margin-top: 0;
-            font-size: 16px;
+            font-size: 18px;
             color: #333;
         }
 
@@ -140,11 +166,11 @@
         }
 
         .modal-btn {
-            padding: 10px;
-            font-size: 14px;
+            padding: 12px;
+            font-size: 15px;
             background: #ffffff;
             border: 1px solid #aaa;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
         }
 
@@ -181,7 +207,7 @@
     <!-- User ID Input Panel -->
     <div class="user-panel">
         <label for="username"><strong>Staff Name:</strong></label>
-        <input type="text" id="username" value="J" placeholder="Enter Staff Name">
+        <input type="text" id="username" value="Y" placeholder="Enter Name">
         <button class="btn-update" id="btnUpdateName">Update</button>
     </div>
 
@@ -190,8 +216,9 @@
         <thead>
             <tr>
                 <th>Venues</th>
-                <th>Category</th>
+                <th>Cat</th>
                 <th>Note</th>
+                <th>Stage</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -205,15 +232,20 @@
         <div class="modal">
             <h3 id="modalVenueTitle">Select Status</h3>
             <div class="modal-options">
-                <button class="modal-btn" data-action="set" data-value="Eq at Venue">Eq at Venue</button>
-                <button class="modal-btn" data-action="set" data-value="Eq set up">Eq set up</button>
-                <button class="modal-btn" data-action="set" data-value="Eq Checked">Eq Checked</button>
-                <button class="modal-btn" data-action="set" data-value="Eq Kept">Eq Kept</button>
+                <button class="modal-btn" data-action="set" data-value="Eq at Venue" data-stage="1">1. Eq at Venue</button>
+                <button class="modal-btn" data-action="set" data-value="Eq set up" data-stage="2">2. Eq set up</button>
+                <button class="modal-btn" data-action="set" data-value="Eq Checked" data-stage="3">3. Eq Checked</button>
+                <button class="modal-btn" data-action="set" data-value="Eq Kept" data-stage="4">4. Eq Kept</button>
                 <button class="modal-btn clear-btn" data-action="clear">Clear Status / Reset</button>
                 <button class="modal-btn cancel-btn" data-action="cancel">Cancel</button>
             </div>
         </div>
     </div>
+
+    <script>
+        // -------------------------------------------------------------
+        // FIREBASE CONFIGURATION
+        // -------------------------------------------------------------
 
     <script>
         // -------------------------------------------------------------
@@ -229,12 +261,13 @@
             appId: "1:209978478786:web:c202c1176964ab803d6b5b"
         };
 
+
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const statusRef = database.ref('setup_status');
 
-        let currentStaffName = document.getElementById("username").value.trim() || "J";
+        let currentStaffName = document.getElementById("username").value.trim() || "Y";
         let activeVenueId = null;
 
         const tableData = [
@@ -263,6 +296,13 @@
             { id: "v23", venue: "Music Room 1", category: "Exam", note: "CL" }
         ];
 
+        const optionToStage = {
+            "Eq at Venue": 1,
+            "Eq set up": 2,
+            "Eq Checked": 3,
+            "Eq Kept": 4
+        };
+
         const tbody = document.querySelector("#trackerTable tbody");
         const modal = document.getElementById("optionModal");
         const modalTitle = document.getElementById("modalVenueTitle");
@@ -281,16 +321,22 @@
                 <td>${row.venue}</td>
                 <td>${row.category}</td>
                 <td>${row.note}</td>
+                <td class="stage-cell" id="stage-${row.id}"></td>
                 <td class="status-cell" id="status-${row.id}"></td>
             `;
 
-            // Open Modal on cell click
+            // Open Modal on status or stage cell click
             const statusCell = tr.querySelector(".status-cell");
-            statusCell.addEventListener("click", () => {
+            const stageCell = tr.querySelector(".stage-cell");
+            
+            const openModal = () => {
                 activeVenueId = row.id;
                 modalTitle.textContent = `${row.venue}`;
                 modal.classList.add("active");
-            });
+            };
+
+            statusCell.addEventListener("click", openModal);
+            stageCell.addEventListener("click", openModal);
 
             tbody.appendChild(tr);
         });
@@ -302,8 +348,10 @@
 
                 if (action === "set") {
                     const opt = btn.getAttribute("data-value");
+                    const stage = btn.getAttribute("data-stage");
                     statusRef.child(activeVenueId).set({
                         selectedOption: opt,
+                        stage: stage,
                         updatedBy: currentStaffName,
                         timestamp: getFormattedTime()
                     });
@@ -325,7 +373,7 @@
         });
 
         // -------------------------------------------------------------
-        // Update Button: Updates local staff name & updates previous records
+        // Update Button: Updates local staff name & previous records
         // -------------------------------------------------------------
         document.getElementById("btnUpdateName").addEventListener("click", () => {
             const newName = document.getElementById("username").value.trim();
@@ -337,7 +385,6 @@
             const oldName = currentStaffName;
             currentStaffName = newName;
 
-            // Retroactively update entries updated by the old name
             if (oldName && oldName !== newName) {
                 statusRef.once('value', (snapshot) => {
                     const updates = {};
@@ -365,18 +412,36 @@
             const data = snapshot.val() || {};
 
             tableData.forEach((row) => {
-                const cell = document.getElementById(`status-${row.id}`);
+                const statusCell = document.getElementById(`status-${row.id}`);
+                const stageCell = document.getElementById(`stage-${row.id}`);
                 const rowState = data[row.id];
 
+                // Reset classes
+                stageCell.className = "stage-cell";
+                statusCell.className = "status-cell";
+
                 if (rowState && rowState.selectedOption) {
-                    cell.classList.add("has-status");
-                    cell.innerHTML = `
+                    const stageNum = rowState.stage || optionToStage[rowState.selectedOption] || "";
+                    
+                    // Update Stage Cell
+                    stageCell.textContent = stageNum;
+                    if (stageNum) {
+                        stageCell.classList.add(`stage-${stageNum}`);
+                    }
+
+                    // Update Status Cell
+                    statusCell.classList.add("has-status");
+                    if (stageNum) {
+                        statusCell.classList.add(`stage-${stageNum}`);
+                    }
+
+                    statusCell.innerHTML = `
                         <span class="status-title">${rowState.selectedOption}</span>
                         <span class="status-meta">[${rowState.updatedBy} @ ${rowState.timestamp}]</span>
                     `;
                 } else {
-                    cell.classList.remove("has-status");
-                    cell.innerHTML = "";
+                    stageCell.textContent = "";
+                    statusCell.innerHTML = "";
                 }
             });
         });
