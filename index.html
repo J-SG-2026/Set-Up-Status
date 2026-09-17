@@ -139,24 +139,24 @@
             return new Date().toTimeString().split(' ')[0];
         }
 
-        // Send log entry using URLSearchParams to avoid CORS blocking
+        // Send log entry via URL parameters (Bypasses CORS completely)
         function logToGoogleSheet(venueData, statusText, stageNum) {
-            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbwX4JoE-LtkGDrlTw6CdZGkSORW2Uso6TO3VRfVV4XY03KaBo4gPIKf6_wQ0oI0fMxW/exec")) return;
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("https://script.google.com/macros/s/AKfycbz1cPtqS8bSBvKYpzOx0RJqDx1IH8wvFehHc2lGqzZk6qDsbgetZiZEKRpqeMXnaeHn/exec")) return;
 
-            const formData = new URLSearchParams();
-            formData.append("venue", venueData.venue);
-            formData.append("category", venueData.category);
-            formData.append("note", venueData.note);
-            formData.append("stage", stageNum);
-            formData.append("status", statusText);
-            formData.append("staff", currentStaffName);
+            const params = new URLSearchParams({
+                venue: venueData.venue,
+                category: venueData.category,
+                note: venueData.note,
+                stage: stageNum,
+                status: statusText,
+                staff: currentStaffName
+            });
 
-            fetch(GOOGLE_SHEET_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: formData.toString()
-            }).catch(err => console.error("Sheets log error:", err));
+            const requestUrl = `${GOOGLE_SHEET_URL}?${params.toString()}`;
+
+            // Image ping triggers Google Apps Script instantly without CORS checks
+            const img = new Image();
+            img.src = requestUrl;
         }
 
         tableData.forEach((row) => {
@@ -190,7 +190,7 @@
             btn.addEventListener("click", () => {
                 const action = btn.getAttribute("data-action");
 
-                // Immediately hide popup modal upon button click
+                // Instantly hide popup modal
                 modal.classList.remove("active");
 
                 if (!activeVenueId) return;
@@ -200,7 +200,7 @@
                     const opt = btn.getAttribute("data-value");
                     const stage = btn.getAttribute("data-stage");
 
-                    // 1. Save to Firebase
+                    // 1. Update Realtime Firebase
                     statusRef.child(activeVenueId).set({
                         selectedOption: opt,
                         stage: stage,
